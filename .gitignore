@@ -8,3 +8,5 @@ embedded/.vscode
 api/nilevenv
 api/__pycache__
 api/.env
+venv
+api/venv
