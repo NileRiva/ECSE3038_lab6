@@ -1,67 +1,79 @@
-# Lab 5
+# Lab 6
 
-## Reporting the state of LEDs using Arduino and HTTP
+For this lab, students will be implementing part of an end-to-end platform to be used to control the state of electronic devices connected to the ESP32 module.
 
-In this assignment, students will learn how to use Arduino to send HTTP requests to a server to report the states of three LEDs in their circuit to a webpage. 
+Students will be asked to write two separate applications, one to be used as an API that should be accessible over the internet and the other to used as an arduino sketch to be programmed on to ESP32 module.
 
-Students should create an Arduino sketch that sends an HTTP request with a JSON body to an API to set the desired state of the light switches on a webpage.
+## Embedded
 
-### Set up the circuit
+For consistency, use pins 22 and 23 for your Fan and Light pins respectively.
 
-Connect three LEDs to digital output pins on the ESP32 board. Use a resistor for each LED to limit the current and prevent damage to the LEDs.
+Also, use the variable names WIFI_USER and WIFI_PASS as the wifi information in your arduino code.
 
-The API has already been built for you and can be accessed at the following URL:
+### PUT request
 
-```
-https://ecse-three-led-api-v2.onrender.com
-```
-
-### Embedded HTTP Input
-
-You’ll be allowed to view the set state of each of the three LEDs by using this [tester site](https://ecse-three-led-v2.netlify.app/). The site should allow to see the current state of your circuit after the LED states have been changed. 
-
-Note the assigned username in the top left corner of the webpage. This is a unique identifier and should be included in your PUT requests to the API as an API key.
-
-This ensures that each person is able to control their own instance of the webpage.
-
-The API expects a PUT request to include an API key in the request headers:
+Create a function that reads the current temperature from a connected digital temperature sensor. This temperature value should be used to populate the body of a PUT request that should be sent form the ESP32 to your API.
 
 ```
-PUT /api/state HTTP/1.1
-Host: https://ecse-three-led-api-v2.onrender.com
-X-API-Key: {username}
+PUT /api/temperature HTTP/1.1
+Host: {https://your.api.domain}
 Content-type: application/json
-Content-length: 76
+Content-length: 23
 
-{ "light_switch_1": true, "light_switch_2": false, "light_switch_3": false }
+{ "temperature": 29.2 }
 ```
 
-### Write the Arduino sketch
+If you don't have access to a digital temperature sensor, you may create a function that generates and returns a random float between 21.0 and 33.0. 
 
-Use the relevant libraries to connect to the API and send a PUT request to the `/api/state` route of the API. 
+### GET request
 
-Create a two dimensional array that contains the desired state of the LEDs. 
-
-Two dimensional array should should allow your three LEDs to flash in the order of a 3 bit binary counter, for example:
+Your ESP32 module code should also include a get request that should be sent to your API.
 
 ```
-false, false, false
-false, false, true
-...
+GET /api/state HTTP/1.1
+Host: {https://your.api.domain}
 ```
 
-Your array should contain, at least, 8 arrays, and each inner array should be one that has 3 Boolean values. 
+The response of this request should determine how your circuit reacts, ie, the state of your fan pin and light pin.
 
-Use a for loop to iterate through your array to digitally write the the desired state of each LED.
+## API
 
-The PUT request should be made after the states of all three LEDs are set.
+You’ll be expected to make your API available over the internet by deploying your server application to an online cloud hosting service like [https://render.com/](https://render.com/).
 
-Pause for at least 2 seconds after each request.
+Make sure that your code works from your local machine first then commit to GitHub so that render has access to it.
 
-It is not necessary, in this case to parse the response of the API as no usable information is reported back after a successful request.
+### GET request
 
-You may still need to see what that response looks like in case you’re facing any unexpected errors.
+The API response from the GET request handler should contain a JSON body that has a fan and and light attribute. 
 
-**NOTE**
+The fan attribute of the JSON response should be true if the current temp in the database is greater than or equal to 28.0 and it should be false otherwise. 
 
-Treat the Wifi name, Wifi password, API URL and API Key as sensitive information.
+The light attribute should be true if the current time is later than todays sunset time according to the below API, and should be false otherwise. 
+
+```
+https://ecse-sunset-api.onrender.com/api/sunset
+```
+
+### PUT request
+
+The API response from the PUT request handler should return am HTTP 204 status code on a successful PUT and return an HTTP 400 otherwise.
+
+Your request body from the ESP32 should be saved directly to the database
+
+## Submission
+
+Due date is Sunday March 12, 2023.
+
+The repo name must be "ECSE3038_lab6".
+
+Include a README.md. This readme should outline what was done to complete the lab.
+
+Also include a link to your API URL in the readme.
+
+Your repository should **NOT** include the `.vscode` folder at all.
+
+Remember to ignore your `env.h` file.
+
+You're only required to provide a link to your GitHub repository. 
+
+Any commits made to the repo after the due date will not be considered.
