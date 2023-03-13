@@ -4,8 +4,8 @@
 #include <ArduinoJson.h>
 #include "env.h"
 
-const char* endpoint = API_URL;
-
+const char* putendpoint = API_URL;
+const char* getendpoint = API_URL;
 
 const int fanpin = 22;
 const int lightpin = 23;
@@ -41,35 +41,33 @@ void loop() {
     String http_response;
 
     //PUT REQUEST
-    String route = endpoint;
-    http.begin(route);
+    http.begin(putendpoint);
     http.addHeader("Content-Type", "application/json");
     http.addHeader("Content-length", "23");
-    
+
     StaticJsonDocument<1024> putdoc; // Empty JSONDocument
     String httpRequestData; // Emtpy string to be used to store HTTP request data string
 
     putdoc["temperature"]=float_rand(21.0,33.0);
     serializeJson(putdoc, httpRequestData);
 
-    int httpResponseCode = http.PUT(httpRequestData);
+    int PUTResponseCode = http.PUT(httpRequestData);
 
 
-    if (httpResponseCode>0) {
+    if (PUTResponseCode>0) {
         Serial.print("Response:");
-        Serial.print(httpResponseCode);
+        Serial.print(PUTResponseCode);
         http_response = http.getString();
         Serial.println(http_response);}
 
     else {
         Serial.print("Error: ");
-        Serial.println(httpResponseCode);}
+        Serial.println(PUTResponseCode);}
       
       http.end();
       
-     //GET REQUEST
-     String route = endpoint;
-    http.begin(route);
+    //GET REQUEST
+    http.begin(getendpoint);
   
 
     int httpResponseCode = http.GET();
