@@ -68,13 +68,14 @@ async def getstate():
     lightstate = not(sunset()<datetime.now())
     Dictionary ={'fan':fanstate, 'light':lightstate}
     jsonString = json.dumps(Dictionary)
-    print(jsonString)
+    print(jsonString)#troubleshooting
     return jsonString
 
 def sunset():
-    sunsetresponse=requests.get()
+    sunsetresponse=requests.get("https://ecse-sunset-api.onrender.com/api/sunset")
     sunsetjson = sunsetresponse.json()
     sunsettimedate = sunsetjson["sunset"]
+    sunsettimedate = datetime.strptime(sunsettimedate,'%Y-%m-%dT%H:%M:%S.%f')
     return sunsettimedate
 
 if __name__ == "__main__":
