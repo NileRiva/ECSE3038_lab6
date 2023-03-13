@@ -4,8 +4,8 @@
 #include <ArduinoJson.h>
 #include "env.h"
 
-const char* putendpoint = API_URL;
-const char* getendpoint = API_URL;
+const char* putendpoint = API_URL_PUT;
+const char* getendpoint = API_URL_GET;
 
 const int fanpin = 22;
 const int lightpin = 23;
