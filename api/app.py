@@ -17,7 +17,7 @@ app = FastAPI()
 
 
 load_dotenv() #Nile Code, loads things from the coding environment
-client = motor.motor_asyncio.AsyncIOMotorClient(os.getenv('MONGO_CONNECTION_STRING'))#Attempt at hiding URL - Nile
+client = motor.motor_asyncio.AsyncIOMotorClient(os.getenv(MONG0_CONNECTION_STRING))#Attempt at hiding URL - Nile
 db = client.temperaturedb
 
 
@@ -36,19 +36,16 @@ app.add_middleware(
 #PUT 
 @app.put("/api/temperature",status_code=204)
 async def set_temp(request:Request):
-    print("Testing...")
+    
     temperature = await request.json()
-
     elements = await db["temperatures"].find().to_list(1)
 
     if len(elements)==0:
-         print("Not Doing Else")#Troubleshooting
          new_temp = await db["temperatures"].insert_one(temperature)
          patched_temp = await db["temperatures"].find_one({"_id": new_temp.inserted_id }) #updated_tank.upserted_id
          return patched_temp
     else:
         id=elements[0]["_id"]
-        print(id) #Troubleshooting
         updated_temp= await db["temperatures"].update_one({"_id":id},{"$set": temperature})
         patched_temp = await db["temperatures"].find_one({"_id": id}) #updated_tank.upserted_id
         if updated_temp.modified_count>=1: 
@@ -62,8 +59,6 @@ async def getstate():
     fanstate = (float(currenttemp["temperature"])>referencetemp) #Watch Formatting here
     lightstate = (sunset()<datetime.now())
     Dictionary ={"fan":fanstate, "light":lightstate}
-    jsonString = json.dumps(Dictionary)
-    print(jsonString)#troubleshooting
     return Dictionary
 
 def sunset():
