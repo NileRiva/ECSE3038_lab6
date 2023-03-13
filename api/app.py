@@ -23,7 +23,7 @@ db = client.temperaturedb
 
 pydantic.json.ENCODERS_BY_TYPE[ObjectId]=str
 
-origins = ["https://ecse3038-lab3-tester.netlify.app"]
+origins = ["https://nilelab6.onrender.com"]
 
 app.add_middleware(
     CORSMiddleware,
