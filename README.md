@@ -51,29 +51,16 @@ The fan attribute of the JSON response should be true if the current temp in the
 The light attribute should be true if the current time is later than todays sunset time according to the below API, and should be false otherwise. 
 
 ```
-https://ecse-sunset-api.onrender.com/api/sunset
+GET /api/sunset HTTP/1.1
+Host: https://ecse-sunset-api.onrender.com
 ```
 
 ### PUT request
 
 The API response from the PUT request handler should return am HTTP 204 status code on a successful PUT and return an HTTP 400 otherwise.
 
-Your request body from the ESP32 should be saved directly to the database
+Your request body from the ESP32 should be saved directly to the database.
 
 ## Submission
 
-Due date is Sunday March 12, 2023.
-
-The repo name must be "ECSE3038_lab6".
-
-Include a README.md. This readme should outline what was done to complete the lab.
-
-Also include a link to your API URL in the readme.
-
-Your repository should **NOT** include the `.vscode` folder at all.
-
-Remember to ignore your `env.h` file.
-
-You're only required to provide a link to your GitHub repository. 
-
-Any commits made to the repo after the due date will not be considered.
+Your GitHub repository should be organised as follows:

@@ -7,6 +7,9 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 import uvicorn
+import json
+import requests
+referencetemp=28
 
 app = FastAPI()
 
@@ -15,7 +18,7 @@ app = FastAPI()
 
 load_dotenv() #Nile Code, loads things from the coding environment
 client = motor.motor_asyncio.AsyncIOMotorClient(os.getenv("MONG0_CONNECTION_STRING"))#Attempt at hiding URL - Nile
-db = client.tanks
+db = client.temperaturedb
 db2 = client.profile
 
 def currdatetime():
@@ -35,62 +38,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#PUT 
+@app.put("/api/temperature",status_code=204)
+async def set_temp(request:Request):
+    print("Testing...")
+    temperature = await request.json()
 
-#POST /profile
-@app.post("/profile",status_code=201)
-async def addprofile(request:Request):
-    profiletemp = await request.json()
-    profiletemp["last_updated"]= currdatetime()
-    
-    
-    newprofile = await db2["profile"].insert_one(profiletemp)#Does insert_one have a return
-    createdprofile = await db2["profile"].find_one({"_id": newprofile.inserted_id })
-    return createdprofile
-
-#GET /profile
-@app.get("/profile",status_code=200)#200 is Default though
-async def getprofile(request:Request):
-    userprofile = await db2["profile"].find().to_list(1)#parameter limits amount of objects
-    if len(userprofile)==0:
-        return {}
-    return userprofile[len(userprofile)-1]
-
-#POST /data
-@app.post("/data",status_code=201)
-async def create_new_tank(request:Request):
-    tank_object = await request.json()
-
-    new_tank = await db["tanks"].insert_one(tank_object)#Does insert_one have a return
-    created_tank = await db["tanks"].find_one({"_id": new_tank.inserted_id })
-    return created_tank
+    elements = await db["temperatures"].find().to_list(999)
+    #return elements
+    if len(elements)==0:
+         print("Not Doing Else")#Troubleshooting
+         new_temp = await db["temperatures"].insert_one(temperature)
+         patched_temp = await db["temperatures"].find_one({"_id": new_temp.inserted_id }) #updated_tank.upserted_id
+         return patched_temp
+    else:
+        id=str(elements[0]["_id"])
+        print(id) #Troubleshooting
+        updated_temp= await db["temperatures"].update_one({"_id":id},{"$set": temperature})
+        patched_temp = await db["temperatures"].find_one({"_id": id}) #updated_tank.upserted_id
+        if updated_temp.modified_count>=1: 
+            return patched_temp
+    raise HTTPException(status_code=400,detail="Issue")
 
 #GET /data
-@app.get("/data")
-async def get_all_tanks():
-    tanks = await db["tanks"].find().to_list(999)#parameter limits amount of objects
-    return tanks
+@app.get("/api/state")
+async def getstate():
+    currenttemp = await db["temperatures"].find_one()
+    fanstate = (currenttemp["temperature"]>referencetemp) #Watch Formatting here
+    lightstate = not(sunset()<datetime.now())
+    Dictionary ={'fan':fanstate, 'light':lightstate}
+    jsonString = json.dumps(Dictionary)
+    print(jsonString)
+    return jsonString
 
-@app.get("/data/{id}")
-async def get_one_tank_by_id(id: str):
-    tank = await db["tanks"].find_one({"_id": ObjectId(id)})
-    return tank
-
-#PATCH /data/:id
-@app.patch("/data/{id}")
-async def update_tank(id: str,request:Request):
-    tank_object = await request.json()
-
-    updated_tank= await db["tanks"].update_one({"_id": ObjectId(id)},{"$set": tank_object})
-    patched_tank = await db["tanks"].find_one({"_id": ObjectId(id) }) #updated_tank.upserted_id
-    if updated_tank.modified_count>=1: 
-        return patched_tank
-    raise HTTPException(status_code=304,detail="No Entity was Modified by this Request")
-
-#DELETE /data/:id
-@app.delete("/data/{id}",status_code=204)
-async def delete_tank(id: str):
-    await db["tanks"].delete_one({"_id": ObjectId(id)})
-
+def sunset():
+    sunsetresponse=requests.get()
+    sunsetjson = sunsetresponse.json()
+    sunsettimedate = sunsetjson["sunset"]
+    return sunsettimedate
 
 if __name__ == "__main__":
     uvicorn.run(app, host='0.0.0.0' , port=8000)
