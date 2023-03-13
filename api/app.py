@@ -9,6 +9,8 @@ from datetime import datetime
 import uvicorn
 import json
 import requests
+import pytz
+
 referencetemp=28.0
 
 app = FastAPI()
@@ -57,14 +59,16 @@ async def set_temp(request:Request):
 async def getstate():
     currenttemp = await db["temperatures"].find_one()
     fanstate = (float(currenttemp["temperature"])>referencetemp) #Watch Formatting here
-    lightstate = (sunset()<datetime.now())
+    lightstate = (datetime.now(tz=pytz.timezone('America/New_York')).time()>sunset().time())
     Dictionary ={"fan":fanstate, "light":lightstate}
     return Dictionary
 
 def sunset():
-    sunsetresponse=requests.get("https://ecse-sunset-api.onrender.com/api/sunset")
+    sunsetresponse=requests.get(f'https://api.sunrise-sunset.org/json?lat=18.1096&lng=-77.2975&date=today')
     sunsetjson = sunsetresponse.json()
-    sunsettimedate = sunsetjson["sunset"]
-    sunsettimedate = datetime.strptime(sunsettimedate,'%Y-%m-%dT%H:%M:%S.%f')
+    sunsettimedate = sunsetjson["results"]["sunset"]
+    sunsettimedate = datetime.strptime(sunsettimedate,'%I:%M:%S %p')
     return sunsettimedate
+
+
 
