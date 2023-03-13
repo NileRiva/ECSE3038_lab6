@@ -63,3 +63,4 @@ Your request body from the ESP32 should be saved directly to the database.
 
 
 API URL https://nilelab6.onrender.com
+ALTERNATE https://ecse3038-lab6.onrender.com
