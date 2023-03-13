@@ -17,7 +17,7 @@ app = FastAPI()
 
 
 load_dotenv() #Nile Code, loads things from the coding environment
-client = motor.motor_asyncio.AsyncIOMotorClient(os.getenv("MONGO_CONNECTION_STRING"))#Attempt at hiding URL - Nile
+client = motor.motor_asyncio.AsyncIOMotorClient(os.getenv('MONGO_CONNECTION_STRING'))#Attempt at hiding URL - Nile
 db = client.temperaturedb
 
 
