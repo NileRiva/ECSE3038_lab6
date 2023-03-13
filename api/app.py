@@ -9,7 +9,7 @@ from datetime import datetime
 import uvicorn
 import json
 import requests
-referencetemp=28
+referencetemp=28.0
 
 app = FastAPI()
 
@@ -44,15 +44,15 @@ async def set_temp(request:Request):
     print("Testing...")
     temperature = await request.json()
 
-    elements = await db["temperatures"].find().to_list(999)
-    #return elements
+    elements = await db["temperatures"].find().to_list(1)
+
     if len(elements)==0:
          print("Not Doing Else")#Troubleshooting
          new_temp = await db["temperatures"].insert_one(temperature)
          patched_temp = await db["temperatures"].find_one({"_id": new_temp.inserted_id }) #updated_tank.upserted_id
          return patched_temp
     else:
-        id=str(elements[0]["_id"])
+        id=elements[0]["_id"]
         print(id) #Troubleshooting
         updated_temp= await db["temperatures"].update_one({"_id":id},{"$set": temperature})
         patched_temp = await db["temperatures"].find_one({"_id": id}) #updated_tank.upserted_id
@@ -66,10 +66,10 @@ async def getstate():
     currenttemp = await db["temperatures"].find_one()
     fanstate = (currenttemp["temperature"]>referencetemp) #Watch Formatting here
     lightstate = (sunset()<datetime.now())
-    Dictionary ={'fan':fanstate, 'light':lightstate}
+    Dictionary ={"fan":fanstate, "light":lightstate}
     jsonString = json.dumps(Dictionary)
     print(jsonString)#troubleshooting
-    return jsonString
+    return Dictionary
 
 def sunset():
     sunsetresponse=requests.get("https://ecse-sunset-api.onrender.com/api/sunset")
@@ -78,5 +78,3 @@ def sunset():
     sunsettimedate = datetime.strptime(sunsettimedate,'%Y-%m-%dT%H:%M:%S.%f')
     return sunsettimedate
 
-if __name__ == "__main__":
-    uvicorn.run(app, host='0.0.0.0' , port=8000)
