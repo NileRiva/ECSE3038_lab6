@@ -56,7 +56,7 @@ if(WiFi.status()== WL_CONNECTED){
     // Serialise JSON object into a string to be sent to the API
   
 
-    docput["temperature"] = getTemp();
+    docput["temperature"] = float_rand(21.0,33.0);
 
 
     // convert JSON document, doc, to string and copies it into httpRequestData
