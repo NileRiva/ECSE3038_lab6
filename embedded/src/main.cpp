@@ -33,93 +33,80 @@ void setup() {
 }
 
 
-void loop() {
-if(WiFi.status()== WL_CONNECTED){
-    Serial.println("");
-    Serial.println("");
-    HTTPClient http;
-  
-    // Establish a connection to the server
+void loop() {//PUT Request
+  if(WiFi.status()== WL_CONNECTED){   
     
-    http.begin(putendpoint);
-    http.addHeader("Content-type", "application/json");
-    http.addHeader("Content-length", "23");
-
-
-
-    // Specify content-type header
-    //http.addHeader("Content-Type", "application/json");
-
-    StaticJsonDocument<1024> docput;
-    String httpRequestData;
-
-    // Serialise JSON object into a string to be sent to the API
-  
-
-    docput["temperature"] = float_rand(21.0,33.0);
-
-
-    // convert JSON document, doc, to string and copies it into httpRequestData
-    serializeJson(docput, httpRequestData);
-
-    // Send HTTP PUT request
-    int httpResponseCode = http.PUT(httpRequestData);
+    HTTPClient http;
     String http_response;
 
-    // check reuslt of PUT request. negative response code means server wasn't reached
-    if (httpResponseCode>0) {
-      Serial.print("HTTP Response code: ");
-      Serial.println(httpResponseCode);
+    //PUT REQUEST
+    http.begin(putendpoint);
+    http.addHeader("Content-Type", "application/json");
+    
 
-      Serial.print("HTTP Response from server: ");
-      http_response = http.getString();
-      Serial.println(http_response);
-    }
-    else {
-      Serial.print("Error code: ");
-      Serial.println(httpResponseCode);
-    }
+    StaticJsonDocument<1024> putdoc; // Empty JSONDocument
+    String httpRequestData; // Emtpy string to be used to store HTTP request data string
 
-    http.end();    
-    http.begin(getendpoint);
-    httpResponseCode = http.GET();
+    putdoc["temperature"]=float_rand(21.0,33.0);
+    serializeJson(putdoc, httpRequestData);
 
-    Serial.println("");
-    Serial.println("");
+    int PUTResponseCode = http.PUT(httpRequestData);
 
-    if (httpResponseCode>0) {
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode);
 
-        Serial.print("Response from server: ");
+    if (PUTResponseCode>0) {
+        Serial.print("Response:");
+        Serial.print(PUTResponseCode);
         http_response = http.getString();
-        Serial.println(http_response);
-      }
+        Serial.println(http_response);}
+
+    else {
+        Serial.print("Error: ");
+        Serial.println(PUTResponseCode);}
+      
+      http.end();
+      
+    //GET REQUEST
+    http.begin(getendpoint);
+  
+
+    int httpResponseCode = http.GET();
+
+
+    if (httpResponseCode>0) {
+        Serial.print("Response:");
+        Serial.print(httpResponseCode);
+        http_response = http.getString();
+        Serial.println(http_response);}
       else {
-        Serial.print("Error code: ");
-        Serial.println(httpResponseCode);
-    }
- 
-    StaticJsonDocument<1024> docget;
+        Serial.print("Error: ");
+        Serial.println(httpResponseCode);}
+      http.end();
 
-    DeserializationError error = deserializeJson(docget, http_response);
+      
+      StaticJsonDocument<1024> doc;
+      DeserializationError error = deserializeJson(doc, http_response);
 
-    if (error) {
-      Serial.print("deserializeJson() failed: ");
-      Serial.println(error.c_str());
-      return;
-    }
-    
-    bool temp = docget["fan"]; 
-    bool light= docget["light"]; 
+      if (error) 
+      { Serial.print("deserializeJson() failed:");
+        Serial.println(error.c_str());
+        return;}
+      
+      bool lightstate = doc["light"];
+      bool fanstate = doc["fan"];
+  
+  
+      Serial.println("Light:");
+      Serial.println(lightstate);
+      Serial.println("Fan:");
+      Serial.println(fanstate);
 
-    digitalWrite(fanpin,temp);
-    digitalWrite(lightpin,light);
-    
-    // Free resources
-    http.end();
+      digitalWrite(fanpin, fanstate);
+      digitalWrite(lightpin,lightstate);
+      
+      Serial.println("Light and Fan Switched Successfully");
+        
   }
-  else {
-    Serial.println("WiFi Disconnected");
-  }
+  
+  else {Serial.println("Not Connected");}
+
 }
