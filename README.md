@@ -61,6 +61,5 @@ The API response from the PUT request handler should return am HTTP 204 status c
 
 Your request body from the ESP32 should be saved directly to the database.
 
-## Submission
 
-Your GitHub repository should be organised as follows:
+API URL https://nilelab6.onrender.com
