@@ -57,8 +57,8 @@ async def set_temp(request:Request):
 #GET /data
 @app.get("/api/state")
 async def getstate():
-    currenttemp = await db["temperatures"].find_one()
-    fanstate = (float(currenttemp["temperature"])>referencetemp) #Watch Formatting here
+    currenttemp = await db["temperatures"].find().to_list(1)
+    fanstate = (float(currenttemp[0]["temperature"])>referencetemp) #Watch Formatting here
     lightstate = (datetime.now(tz=pytz.timezone('America/New_York')).time()>sunset().time())
     Dictionary ={"fan":fanstate, "light":lightstate}
     return Dictionary
