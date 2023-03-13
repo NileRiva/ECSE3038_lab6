@@ -114,7 +114,7 @@ if(WiFi.status()== WL_CONNECTED){
     bool light= docget["light"]; 
 
     digitalWrite(fanpin,temp);
-    digitalWrite(lightpin,temp);
+    digitalWrite(lightpin,light);
     
     // Free resources
     http.end();
