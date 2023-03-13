@@ -19,12 +19,7 @@ app = FastAPI()
 load_dotenv() #Nile Code, loads things from the coding environment
 client = motor.motor_asyncio.AsyncIOMotorClient(os.getenv("MONG0_CONNECTION_STRING"))#Attempt at hiding URL - Nile
 db = client.temperaturedb
-db2 = client.profile
 
-def currdatetime():
-    dt=datetime.now()
-    currdatetimestr= dt.strftime("%#d/%#m/%Y, %#I:%M:%S %p")#date fomatted exactly how you have it in the request
-    return currdatetimestr
 
 pydantic.json.ENCODERS_BY_TYPE[ObjectId]=str
 
@@ -64,7 +59,7 @@ async def set_temp(request:Request):
 @app.get("/api/state")
 async def getstate():
     currenttemp = await db["temperatures"].find_one()
-    fanstate = (currenttemp["temperature"]>referencetemp) #Watch Formatting here
+    fanstate = (float(currenttemp["temperature"])>referencetemp) #Watch Formatting here
     lightstate = (sunset()<datetime.now())
     Dictionary ={"fan":fanstate, "light":lightstate}
     jsonString = json.dumps(Dictionary)
