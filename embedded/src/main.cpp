@@ -113,8 +113,8 @@ if(WiFi.status()== WL_CONNECTED){
     bool temp = docget["fan"]; 
     bool light= docget["light"]; 
 
-    digitalWrite(fanPin,temp);
-    digitalWrite(lightPin,temp);
+    digitalWrite(fanpin,temp);
+    digitalWrite(lightpin,temp);
     
     // Free resources
     http.end();
