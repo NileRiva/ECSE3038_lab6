@@ -15,6 +15,8 @@ float float_rand(float min,float max)
     float scale = rand() / (float) RAND_MAX; /* [0, 1.0] */
     return min + scale * (max-min);      /* [min, max] */
 }
+void getmethod();
+void putmethod();
 
 void setup() {
   Serial.begin(9600);
@@ -35,56 +37,25 @@ void setup() {
 void loop() {
   //Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED){
-    Serial.println("");
-    Serial.println("");
+   
+   putmethod();
+   getmethod();
+    
+  }
+  else {
+    Serial.println("WiFi Disconnected");
+  }
+}
+
+void getmethod(){
+  
     HTTPClient http;
-  
-    // Establish a connection to the server
-    String url = putendpoint;
+
+
+    String url = getendpoint;    
     http.begin(url);
-    http.addHeader("Content-type", "application/json");
-
-
-
-    // Specify content-type header
-    //http.addHeader("Content-Type", "application/json");
-
-    StaticJsonDocument<1024> docput;
-    String httpRequestData;
-
-    // Serialise JSON object into a string to be sent to the API
-  
-
-    docput["temperature"] = float_rand(21.0,33.0);
-
-
-    // convert JSON document, doc, to string and copies it into httpRequestData
-    serializeJson(docput, httpRequestData);
-
-    // Send HTTP PUT request
-    int httpResponseCode = http.PUT(httpRequestData);
+    int httpResponseCode = http.GET();
     String http_response;
-
-    // check reuslt of PUT request. negative response code means server wasn't reached
-    if (httpResponseCode>0) {
-      Serial.print("HTTP Response code: ");
-      Serial.println(httpResponseCode);
-
-      Serial.print("HTTP Response from server: ");
-      http_response = http.getString();
-      Serial.println(http_response);
-    }
-    else {
-      Serial.print("Error code: ");
-      Serial.println(httpResponseCode);
-    }
-
-    http.end();
-
-
-    url = getendpoint;    
-    http.begin(url);
-    httpResponseCode = http.GET();
 
     Serial.println("");
     Serial.println("");
@@ -93,7 +64,7 @@ void loop() {
         Serial.print("HTTP Response code: ");
         Serial.println(httpResponseCode);
 
-        Serial.print("Response from server: ");
+        Serial.print("Response:");
         http_response = http.getString();
         Serial.println(http_response);
       }
@@ -101,7 +72,7 @@ void loop() {
         Serial.print("Error code: ");
         Serial.println(httpResponseCode);
     }
- 
+  
     StaticJsonDocument<1024> docget;
 
     DeserializationError error = deserializeJson(docget, http_response);
@@ -120,8 +91,39 @@ void loop() {
     
     // Free resources
     http.end();
-  }
-  else {
-    Serial.println("WiFi Disconnected");
-  }
+}
+
+void putmethod(){
+    
+    Serial.println("");
+    HTTPClient http;
+  
+    // Establish a connection to the server
+    String url = putendpoint;
+    http.begin(url);
+    http.addHeader("Content-type", "application/json");
+
+    StaticJsonDocument<1024> docput;
+    String httpRequestData;
+
+    docput["temperature"] = float_rand(21.0,33.0);
+
+    serializeJson(docput, httpRequestData);
+
+    // Send HTTP PUT request
+    int httpResponseCode = http.PUT(httpRequestData);
+    String http_response;
+
+    // check reuslt of PUT request. negative response code means server wasn't reached
+    if (httpResponseCode>0) {
+      Serial.println("PUT Attempted");
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+    }
+    else {
+      Serial.print("Error code:");
+      Serial.println(httpResponseCode);
+    }
+
+    http.end();
 }
