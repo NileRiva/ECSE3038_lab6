@@ -65,7 +65,7 @@ async def set_temp(request:Request):
 async def getstate():
     currenttemp = await db["temperatures"].find_one()
     fanstate = (currenttemp["temperature"]>referencetemp) #Watch Formatting here
-    lightstate = not(sunset()<datetime.now())
+    lightstate = (sunset()<datetime.now())
     Dictionary ={'fan':fanstate, 'light':lightstate}
     jsonString = json.dumps(Dictionary)
     print(jsonString)#troubleshooting
